@@ -391,12 +391,25 @@ void ProcessIncomingNATPMPPacket(int s, unsigned char *msg_buff, int len,
 					snprintf(desc, sizeof(desc), "NAT-PMP %hu %s",
 					         eport, (proto==IPPROTO_TCP)?"tcp":"udp");
 					/* TODO : check return code */
-					if(upnp_redirect_internal(NULL, eport, senderaddrstr,
-					                          iport, proto, desc,
-					                          timestamp) < 0) {
-						syslog(LOG_ERR, "Failed to add NAT-PMP %hu %s->%s:%hu '%s'",
-						       eport, (proto==IPPROTO_TCP)?"tcp":"udp", senderaddrstr, iport, desc);
-						resp[3] = 3;  /* Failure */
+					r = upnp_redirect_internal(NULL, eport, senderaddrstr,
+					                        iport, proto, desc,
+					                        timestamp);
+					if(r < 0) {
+						if(r == -9) {
+							if(!proxy_allow_fallback) {
+								resp[3] = 4;  /* Out of resources */
+								break;
+							}
+							eport++;
+							if(eport == 0) eport++; /* skip port zero */
+							continue;
+						} else if(r == -10) {
+							resp[3] = 2;  /* Not Authorized/Refused */
+						} else {
+							syslog(LOG_ERR, "Failed to add NAT-PMP %hu %s->%s:%hu '%s'",
+							       eport, (proto==IPPROTO_TCP)?"tcp":"udp", senderaddrstr, iport, desc);
+							resp[3] = 3;  /* Failure */
+						}
 					}
 					break;
 				}

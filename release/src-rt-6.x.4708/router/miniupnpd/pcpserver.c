@@ -3,7 +3,8 @@
  * MiniUPnP project
  * Website : http://miniupnp.free.fr/ or https://miniupnp.tuxfamily.org/
  * Author : Peter Tatrai
-
+	retry_eport:
+	do {
 Copyright (c) 2013 by Cisco Systems, Inc.
 All rights reserved.
 
@@ -998,8 +999,20 @@ static int CreatePCPMap_NAT(pcp_info_t *pcp_msg_info)
 				   pcp_msg_info->protocol,
 				   pcp_msg_info->desc,
 				   timestamp);
-	if (r < 0)
+	if (r < 0) {
+		if(r == -9) {
+			if(pcp_msg_info->pfailure_present || !proxy_allow_fallback)
+				return PCP_ERR_CANNOT_PROVIDE_EXTERNAL;
+			pcp_msg_info->ext_port++;
+			if (pcp_msg_info->ext_port == 0) {
+				pcp_msg_info->ext_port++;
+			}
+			goto retry_eport;
+		} else if(r == -10) {
+			return PCP_ERR_NOT_AUTHORIZED;
+		}
 		return PCP_ERR_NO_RESOURCES;
+	}
 	return PCP_SUCCESS;
 }
 

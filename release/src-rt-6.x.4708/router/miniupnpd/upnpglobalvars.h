@@ -10,6 +10,7 @@
 #define UPNPGLOBALVARS_H_INCLUDED
 
 #include <time.h>
+#include <netinet/in.h>
 #include "upnppermissions.h"
 #include "miniupnpdtypes.h"
 #include "config.h"
@@ -37,6 +38,13 @@ extern const char * lease_file6;
 /* forced ip address to use for this interface
  * when NULL, getifaddr() is used */
 extern const char * use_ext_ip_addr;
+
+/* Optional upstream mapping proxy (double NAT) */
+extern int proxy_upstream_enabled;
+extern struct in_addr proxy_upstream_addr;
+extern int proxy_upstream_addr_set;
+extern int proxy_allow_fallback;
+extern unsigned int proxy_upstream_timeout_ms;
 
 /* disallow all port forwarding requests when
  * we are behind restrictive nat */

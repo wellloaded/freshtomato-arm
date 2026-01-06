@@ -83,6 +83,10 @@ enum upnpconfigoptions {
 #ifdef IGD_V2
 	UPNPFORCEIGDDESCV1,
 #endif
+	UPNPPROXYUPSTREAMENABLE,	/* proxy_upstream_enable */
+	UPNPPROXYUPSTREAMIP,		/* proxy_upstream_ip */
+	UPNPPROXYALLOWFALLBACK,		/* proxy_allow_fallback */
+	UPNPPROXYTIMEOUTMS,		/* proxy_upstream_timeout_ms */
 	UPNPENABLE				/* enable_upnp */
 };
 

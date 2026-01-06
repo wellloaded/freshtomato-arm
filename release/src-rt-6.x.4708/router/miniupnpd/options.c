@@ -104,7 +104,11 @@ static const struct {
 	{ UPNPFORCEIGDDESCV1, "force_igd_desc_v1"},
 #endif
 	{ UPNPMINISSDPDSOCKET, "minissdpdsocket"},
-	{ UPNPSECUREMODE, "secure_mode"}
+	{ UPNPSECUREMODE, "secure_mode"},
+	{ UPNPPROXYUPSTREAMENABLE, "proxy_upstream_enable"},
+	{ UPNPPROXYUPSTREAMIP, "proxy_upstream_ip"},
+	{ UPNPPROXYALLOWFALLBACK, "proxy_allow_fallback"},
+	{ UPNPPROXYTIMEOUTMS, "proxy_upstream_timeout_ms"}
 };
 
 int

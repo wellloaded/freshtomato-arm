@@ -1200,6 +1200,20 @@ void start_upnp(void)
 	fappend(f, upnpcfgcustom);
 	fprintf(f, "%s\n", nvram_safe_get("upnp_custom"));
 
+	/* Optional upstream proxy (double NAT) */
+	if(nvram_get_int("upnp_proxy_enable")) {
+		const char *gw = nvram_safe_get("upnp_proxy_upstream_ip");
+		if(gw && *gw) {
+			fprintf(f, "proxy_upstream_enable=yes\n");
+			fprintf(f, "proxy_upstream_ip=%s\n", gw);
+			fprintf(f, "proxy_allow_fallback=%s\n",
+			        nvram_get_int("upnp_proxy_fallback") ? "yes" : "no");
+			if(nvram_get_int("upnp_proxy_timeout_ms") > 0)
+				fprintf(f, "proxy_upstream_timeout_ms=%d\n", nvram_get_int("upnp_proxy_timeout_ms"));
+			fprintf(f, "\n");
+		}
+	}
+
 	for (br = 0; br < BRIDGE_COUNT; br++) {
 		char bridge[2] = "0";
 		if (br != 0)

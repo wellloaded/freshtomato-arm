@@ -99,6 +99,10 @@ struct nvram_tuple upnp_defaults[] = {
 	{ "upnp_port",			"0"				, 0 },
 	{ "upnp_ssdp_interval",		"900"				, 0 },	/* SSDP interval */
 	{ "upnp_custom",		""				, 0 },
+	{ "upnp_proxy_enable",		"0"				, 0 },
+	{ "upnp_proxy_upstream_ip",	""				, 0 },
+	{ "upnp_proxy_fallback",	"0"				, 0 },
+	{ "upnp_proxy_timeout_ms",	"2000"				, 0 },
 	{ "upnp_lan",			""				, 0 },
 #if BRIDGE_COUNT >= 2
  BRIDGE_BLOCK_UPNP(1)

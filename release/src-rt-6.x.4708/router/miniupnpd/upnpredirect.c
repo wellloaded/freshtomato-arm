@@ -26,6 +26,7 @@
 #include "upnpevents.h"
 #include "portinuse.h"
 #include "upnputils.h"
+#include "upstreamproxy.h"
 #if defined(USE_NETFILTER)
 #include "netfilter/iptcrdr.h"
 #endif
@@ -403,6 +404,15 @@ upnp_redirect(const char * rhost, unsigned short eport,
 		    (rhost && (strcmp(rhost, rhost_old) == 0)))) {
 			syslog(LOG_INFO, "updating existing port mapping %hu %s (rhost '%s') => %s:%hu",
 				eport, protocol, rhost_old, iaddr_old, iport_old);
+			if(proxy_upstream_enabled) {
+				unsigned int lifetime = (leaseduration > 0) ? leaseduration : 86400;
+				int pr = upstreamproxy_renew(proto, eport, lifetime);
+				if(pr < 0) {
+					syslog(LOG_WARNING, "upstream proxy renew failed for %hu/%s (%d)",
+					       eport, protocol, pr);
+					return -1;
+				}
+			}
 			timestamp = (leaseduration > 0) ? upnp_time() + leaseduration : 0;
 			if(iport != iport_old) {
 				r = update_portmapping(ext_if_name, eport, proto, iport, desc, timestamp);
@@ -431,8 +441,12 @@ upnp_redirect(const char * rhost, unsigned short eport,
 		timestamp = (leaseduration > 0) ? upnp_time() + leaseduration : 0;
 		syslog(LOG_INFO, "redirecting port %hu to %s:%hu protocol %s for: %s",
 			eport, iaddr, iport, protocol, desc);
-		return upnp_redirect_internal(rhost, eport, iaddr, iport, proto,
-		                              desc, timestamp);
+		r = upnp_redirect_internal(rhost, eport, iaddr, iport, proto,
+		                           desc, timestamp);
+		/* Hide upstream retry/deny semantics from IGD clients */
+		if(r == -9 || r == -10)
+			return -1;
+		return r;
 	}
 }
 
@@ -442,12 +456,36 @@ upnp_redirect_internal(const char * rhost, unsigned short eport,
                        int proto, const char * desc,
                        unsigned int timestamp)
 {
+	int upstream_done = 0;
 	/*syslog(LOG_INFO, "redirecting port %hu to %s:%hu protocol %s for: %s",
 		eport, iaddr, iport, protocol, desc);			*/
 	if(disable_port_forwarding)
 		return -1;
+	if(proxy_upstream_enabled) {
+		unsigned int lifetime = 86400;
+		if(timestamp > 0) {
+			time_t now = upnp_time();
+			if(timestamp > (unsigned int)now)
+				lifetime = (unsigned int)(timestamp - (unsigned int)now);
+			else
+				lifetime = 1;
+		}
+		switch(upstreamproxy_add(proto, eport, lifetime)) {
+		case 0:
+			upstream_done = 1;
+			break;
+		case -9:
+			return -9;
+		case -10:
+			return -10;
+		default:
+			return -1;
+		}
+	}
 	if(add_redirect_rule2(ext_if_name, rhost, eport, iaddr, iport, proto,
 	                      desc, timestamp) < 0) {
+		if(upstream_done)
+			(void)upstreamproxy_del(proto, eport);
 		return -1;
 	}
 
@@ -461,6 +499,8 @@ upnp_redirect_internal(const char * rhost, unsigned short eport,
 #if !defined(__linux__)
 		delete_redirect_rule(ext_if_name, eport, proto);
 #endif
+		if(upstream_done)
+			(void)upstreamproxy_del(proto, eport);
 		return -1;
 	}
 	if(timestamp > 0) {
@@ -554,6 +594,13 @@ int
 _upnp_delete_redir(unsigned short eport, int proto)
 {
 	int r;
+	if(proxy_upstream_enabled) {
+		int pr = upstreamproxy_del(proto, eport);
+		if(pr < 0) {
+			syslog(LOG_WARNING, "upstream proxy delete failed for %hu/%s (%d)",
+			       eport, (proto==IPPROTO_TCP)?"TCP":"UDP", pr);
+		}
+	}
 #if defined(__linux__)
 	r = delete_redirect_and_filter_rules(eport, proto);
 #elif defined(USE_PF)

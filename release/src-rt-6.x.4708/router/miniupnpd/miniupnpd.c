@@ -1452,6 +1452,29 @@ init(int argc, char * * argv, struct runtime_vars * v)
 				if (strcmp(ary_options[i].value, "no") == 0)
 					CLEARFLAG(SECUREMODEMASK);
 				break;
+			case UPNPPROXYUPSTREAMENABLE:
+				if(strcmp(ary_options[i].value, "yes") == 0 || atoi(ary_options[i].value))
+					proxy_upstream_enabled = 1;
+				else
+					proxy_upstream_enabled = 0;
+				break;
+			case UPNPPROXYUPSTREAMIP:
+				if(inet_aton(ary_options[i].value, &proxy_upstream_addr) != 0)
+					proxy_upstream_addr_set = 1;
+				else {
+					INIT_PRINT_ERR("invalid proxy_upstream_ip=%s\n", ary_options[i].value);
+					return 1;
+				}
+				break;
+			case UPNPPROXYALLOWFALLBACK:
+				if(strcmp(ary_options[i].value, "yes") == 0 || atoi(ary_options[i].value))
+					proxy_allow_fallback = 1;
+				else
+					proxy_allow_fallback = 0;
+				break;
+			case UPNPPROXYTIMEOUTMS:
+				proxy_upstream_timeout_ms = (unsigned int)strtoul(ary_options[i].value, NULL, 10);
+				break;
 #ifdef ENABLE_LEASEFILE
 			case UPNPLEASEFILE:
 				lease_file = ary_options[i].value;

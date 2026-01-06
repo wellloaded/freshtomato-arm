@@ -20,11 +20,13 @@
 
 <script>
 
-//	<% nvram("upnp_enable,upnp_secure,upnp_custom,upnp_lan,lan_ifname"); %>
+//	<% nvram("upnp_enable,upnp_secure,upnp_custom,upnp_lan,lan_ifname,upnp_proxy_enable,upnp_proxy_upstream_ip,upnp_proxy_fallback"); %>
 
 var upnp = new TomatoRefresh('upnp.jsx', '', 30);
 
 nvram.upnp_enable = fixInt(nvram.upnp_enable, 0, 3, 0);
+nvram.upnp_proxy_enable = fixInt(nvram.upnp_proxy_enable, 0, 1, 0);
+nvram.upnp_proxy_fallback = fixInt(nvram.upnp_proxy_fallback, 0, 1, 0);
 
 var xob = null;
 
@@ -206,6 +208,15 @@ function verifyFields(focused, quiet) {
 
 	E('_f_upnp_allow_third_party').disabled = !enable;
 	E('_upnp_custom').disabled = !enable;
+	E('_f_upnp_proxy_enable').disabled = !enable;
+	E('_upnp_proxy_upstream_ip').disabled = (!enable || !E('_f_upnp_proxy_enable').checked);
+	E('_f_upnp_proxy_fallback').disabled = (!enable || !E('_f_upnp_proxy_enable').checked);
+	if (E('_upnp_proxy_upstream_ip').disabled)
+		ferror.clear('_upnp_proxy_upstream_ip');
+	else if (E('_upnp_proxy_upstream_ip').value.trim().length < 1) {
+		ferror.set('_upnp_proxy_upstream_ip', 'Required when UPnP Proxy is enabled', quiet);
+		return 0;
+	}
 
 	for (var i = 0 ; i <= MAX_BRIDGE_ID ; i++) {
 		var j = (i == 0) ? '' : i.toString();
@@ -257,6 +268,9 @@ function save() {
 	fom.upnp_lan2.value = fom._f_upnp_lan2.checked ? 1 : 0;
 	fom.upnp_lan3.value = fom._f_upnp_lan3.checked ? 1 : 0;
 
+	fom.upnp_proxy_enable.value = fom.f_upnp_proxy_enable.checked ? 1 : 0;
+	fom.upnp_proxy_fallback.value = fom.f_upnp_proxy_fallback.checked ? 1 : 0;
+
 	fom._nofootermsg.value = 0;
 
 	form.submit(fom, 1);
@@ -300,6 +314,8 @@ function init() {
 <input type="hidden" name="upnp_lan1">
 <input type="hidden" name="upnp_lan2">
 <input type="hidden" name="upnp_lan3">
+<input type="hidden" name="upnp_proxy_enable">
+<input type="hidden" name="upnp_proxy_fallback">
 <input type="hidden" name="remove_proto">
 <input type="hidden" name="remove_eport">
 
@@ -321,6 +337,9 @@ function init() {
 		createFieldTable('', [
 			{ title: 'Enable UPnP IGD', name: 'f_enable_upnp', type: 'checkbox', suffix: ' <small>This protocol is often used by Microsoft-compatible systems<\/small>', value: (nvram.upnp_enable & 1) },
 			{ title: 'Enable PCP/NAT-PMP', name: 'f_enable_pcp_pmp', type: 'checkbox', suffix: ' <small>These protocols are often used by Apple-compatible systems<\/small>', value: (nvram.upnp_enable & 2) },
+			{ title: 'Enable UPnP Proxy', name: 'f_upnp_proxy_enable', type: 'checkbox', suffix: ' <small>Forward mappings to an upstream router (double NAT)<\/small>', value: (nvram.upnp_proxy_enable == 1) },
+			{ title: 'Upstream router IP', indent: 2, name: 'upnp_proxy_upstream_ip', type: 'text', maxlen: 64, value: nvram.upnp_proxy_upstream_ip },
+			{ title: 'Allow fallback external port', indent: 2, name: 'f_upnp_proxy_fallback', type: 'checkbox', suffix: ' <small>Only applicable to PCP/NAT-PMP<\/small>', value: (nvram.upnp_proxy_fallback == 1) },
 			{ title: 'Enabled on' },
 				{ title: 'LAN0', indent: 2, name: 'f_upnp_lan', type: 'checkbox', value: (nvram.upnp_lan == 1) },
 				{ title: 'LAN1', indent: 2, name: 'f_upnp_lan1', type: 'checkbox', value: (nvram.upnp_lan1 == 1) },

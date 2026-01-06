@@ -37,6 +37,13 @@ const char* lease_file6 = 0;
  * when NULL, getifaddr() is used */
 const char * use_ext_ip_addr = 0;
 
+/* Optional upstream mapping proxy (double NAT) */
+int proxy_upstream_enabled = 0;
+struct in_addr proxy_upstream_addr;
+int proxy_upstream_addr_set = 0;
+int proxy_allow_fallback = 0;
+unsigned int proxy_upstream_timeout_ms = 0;
+
 /* disallow all port forwarding requests when
  * we are behind restrictive nat */
 int disable_port_forwarding = 0;
