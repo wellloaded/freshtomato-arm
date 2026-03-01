@@ -775,6 +775,12 @@ void asp_etherstates(int argc, char **argv)
 #endif
 	}
 
+	/* if robocfg returned nothing useful, keep the current display state intact */
+	if (port_count == 0 && wan_state[0] == '\0') {
+		web_puts(ports_disabled);
+		return;
+	}
+
 	/* output the result */
 	web_puts("\netherstates = {");
 
