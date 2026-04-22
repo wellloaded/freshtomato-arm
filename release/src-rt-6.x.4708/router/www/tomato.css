@@ -1774,26 +1774,178 @@ div[id^="wg"] td.co10 {
 	line-height: 14px;
 }
 
-table.adblock-status-table {
-	padding: 5px;
-	border: none;
-	width: 100%;
-}
-
-td.adblock-td1 {
-	width: 145px;
-}
-
 #adblock-status {
-	text-align: left;
-	padding-left: 30px;
-	padding-top: 10px;
-	height: 270px;
-	border: 1px solid #AAAAAA;
+	/* dynamic height based on content */
+	padding: 20px 6px;
+	border: 1px solid rgba(127, 148, 166, 0.25);
+	border-radius: 6px;
+	/* simple transparent background so table expands with content */
+	background: transparent;
+	word-break: break-word;
+	white-space: normal;
 }
 
-.adblock-status-table tr > td > input[type="button"] {
-	width: 120px;
+.adblock-status-head {
+	margin-bottom: 4px;
+}
+
+.adblock-badge {
+	display: inline-block;
+	margin: 0 6px 0 0;
+	padding: 0 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.adblock-badge.ok {
+	background: #e8f4ea;
+	color: #2f7d54;
+}
+
+.adblock-badge.warn {
+	background: #fff3cd;
+	color: #9a6b10;
+}
+
+.adblock-badge.bad {
+	background: #fdecea;
+	color: #b14b55;
+}
+
+.adblock-status-view {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.adblock-status-view th,
+.adblock-status-view td {
+	padding: 4px 0;
+	text-align: left;
+	vertical-align: top;
+	border-top: 1px solid rgba(127, 148, 166, 0.14);
+}
+
+.adblock-status-view tr:first-child th,
+.adblock-status-view tr:first-child td {
+	border-top: 0;
+}
+
+.adblock-status-view th {
+	width: 110px;
+	padding-right: 12px;
+	opacity: 0.75;
+}
+
+.adblock-note {
+	display: block;
+	margin-top: 0px;
+	opacity: 0.85;
+}
+
+.adblock-note-inline {
+	display: inline-block;
+	margin-left: 6px;
+	opacity: 0.85;
+	vertical-align: middle;
+}
+
+.adblock-bar {
+	display: flex;
+	align-items: stretch;
+	box-sizing: border-box;
+	height: 2px;
+	margin-top: 6px;
+	border-radius: 2px;
+	background: rgba(127, 148, 166, 0.22);
+	overflow: hidden;
+	/* constrain visual width of progress bars */
+	max-width: 420px;
+	width: 100%;
+	font-size: 0;
+}
+
+.adblock-bar span {
+	display: block;
+	height: 100%;
+	flex: 0 0 auto;
+}
+
+.adblock-bar span.app {
+	background: #005691;
+}
+
+.adblock-bar span.buffers {
+	background: #f57cd7;
+}
+
+.adblock-bar span.cache {
+	background: #2cb259;
+}
+
+/* buffer/cache specific colours (kept simple) */
+.adblock-bar.buffers span {
+	background: #9a6b10;
+}
+
+.adblock-bar.cache span {
+	background: #6c757d;
+}
+
+.adblock-empty {
+	padding-top: 30px;
+	text-align: center;
+	opacity: 0.72;
+}
+
+/* owner root special colour (no badge style used elsewhere) */
+.adblock-owner-root {
+	color: #9a6b10;
+	font-weight: 700;
+}
+
+/* small spinner used for activity states */
+.adblock-spinner {
+	width: 0.5em;
+	/* ~50% of the current font-size */
+	height: auto;
+	vertical-align: middle;
+	margin-left: 6px;
+	display: inline-block;
+}
+
+.adblock-spinner-cell {
+	margin: 0 auto;
+	display: block;
+}
+
+/* align the middle label column to the right */
+.adblock-status-table .adblock-label {
+	text-align: right;
+	padding-right: 8px;
+}
+
+/* ensure header badges and the top status cell are left-aligned */
+.adblock-status-table td.adblock-label[colspan="2"] {
+	text-align: left;
+	/* override right-align for the top row */
+	padding-right: 0;
+}
+
+.adblock-status-head {
+	text-align: left;
+}
+
+#adblock-grid table {
+	table-layout: auto;
+}
+
+#adblock-grid .co3,
+#adblock-grid input.fi3 {
+	width: 4ch;
+	max-width: 4ch;
+	white-space: nowrap;
+	text-align: center;
 }
 
 span.qriconsvg,
